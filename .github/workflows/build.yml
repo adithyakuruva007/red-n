@@ -28,8 +28,8 @@ jobs:
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
 
-      - name: Build Android Debug APK
-        run: ./gradlew :androidApp:assembleFossDebug --stacktrace
+      - name: Build Optimized Android Release APK
+        run: ./gradlew :androidApp:assembleFossRelease --stacktrace
 
       - name: Verify Kotlin Desktop Compilation
         run: ./gradlew :composeApp:compileKotlinDesktop --stacktrace
@@ -37,5 +37,5 @@ jobs:
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: red-n-debug-apk
-          path: androidApp/build/outputs/apk/foss/debug/*.apk
+          name: red-n-apk
+          path: androidApp/build/outputs/apk/foss/release/*.apk
