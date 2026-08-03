@@ -53,12 +53,14 @@ fun ColorScheme.withBlackBackground(): ColorScheme = copy(
 
 val ColorScheme.isOledFlavor: Boolean get() = background == Color.Black
 val ColorScheme.isClaymorphism: Boolean get() = background == Color(0xFF1A1A24)
+val ColorScheme.isPixelPlayer: Boolean get() = background == Color(0xFF1E1234)
 
 @Composable
 fun redAdaptiveCardColors(): CardColors {
     val scheme = MaterialTheme.colorScheme
     return CardDefaults.cardColors(
         containerColor = when {
+            scheme.isPixelPlayer -> Color(0xFF2A1F40)
             scheme.isOledFlavor -> Color.Transparent
             scheme.isClaymorphism -> Color(0xFF242432)
             else -> scheme.surfaceVariant.copy(alpha = 0.5f)
@@ -70,6 +72,7 @@ fun redAdaptiveCardColors(): CardColors {
 fun redAdaptiveCardBorder(): BorderStroke? {
     val scheme = MaterialTheme.colorScheme
     return when {
+        scheme.isPixelPlayer -> BorderStroke(1.dp, Color(0xFF5E497A).copy(alpha = 0.4f))
         scheme.isOledFlavor -> BorderStroke(1.dp, scheme.outlineVariant)
         scheme.isClaymorphism -> BorderStroke(2.dp, Color.White.copy(alpha = 0.08f))
         else -> null
@@ -79,11 +82,16 @@ fun redAdaptiveCardBorder(): BorderStroke? {
 @Composable
 fun Modifier.redAdaptiveCardSurface(shape: Shape = CardDefaults.shape): Modifier {
     val scheme = MaterialTheme.colorScheme
-    val finalShape = if (scheme.isClaymorphism) RoundedCornerShape(24.dp) else shape
+    val finalShape = when {
+        scheme.isPixelPlayer -> RoundedCornerShape(20.dp)
+        scheme.isClaymorphism -> RoundedCornerShape(24.dp)
+        else -> shape
+    }
     return this
         .clip(finalShape)
         .background(
             when {
+                scheme.isPixelPlayer -> Color(0xFF2A1F40)
                 scheme.isOledFlavor -> Color.Transparent
                 scheme.isClaymorphism -> Color(0xFF242432)
                 else -> scheme.surfaceVariant.copy(alpha = 0.5f)
@@ -91,6 +99,7 @@ fun Modifier.redAdaptiveCardSurface(shape: Shape = CardDefaults.shape): Modifier
         )
         .then(
             when {
+                scheme.isPixelPlayer -> Modifier.border(1.dp, Color(0xFF5E497A).copy(alpha = 0.4f), finalShape)
                 scheme.isOledFlavor -> Modifier.border(1.dp, scheme.outlineVariant, finalShape)
                 scheme.isClaymorphism -> Modifier.border(2.dp, Color.White.copy(alpha = 0.08f), finalShape)
                 else -> Modifier
@@ -99,15 +108,17 @@ fun Modifier.redAdaptiveCardSurface(shape: Shape = CardDefaults.shape): Modifier
 }
 
 @Composable
-fun Modifier.redInputSurface(isFocused: Boolean, shape: Shape = RoundedCornerShape(12.dp)): Modifier {
+fun Modifier.redInputSurface(isFocused: Boolean, shape: Shape = RoundedCornerShape(20.dp)): Modifier {
     val scheme = MaterialTheme.colorScheme
     val finalBg = when {
+        scheme.isPixelPlayer -> Color(0xFF2A1F40)
         scheme.isOledFlavor -> Color.Transparent
         scheme.isClaymorphism -> Color(0xFF242432)
         else -> scheme.surfaceContainerHigh
     }
     val finalBorder = when {
-        isFocused -> BorderStroke(1.dp, scheme.primary)
+        isFocused -> BorderStroke(1.5.dp, scheme.primary)
+        scheme.isPixelPlayer -> BorderStroke(1.dp, Color(0xFF5E497A).copy(alpha = 0.5f))
         scheme.isOledFlavor -> BorderStroke(1.dp, scheme.outlineVariant)
         scheme.isClaymorphism -> BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
         else -> BorderStroke(1.dp, scheme.outline.copy(alpha = 0.5f))
@@ -119,14 +130,16 @@ fun Modifier.redInputSurface(isFocused: Boolean, shape: Shape = RoundedCornerSha
 }
 
 @Composable
-fun Modifier.redIconButtonSurface(shape: Shape = RoundedCornerShape(8.dp)): Modifier {
+fun Modifier.redIconButtonSurface(shape: Shape = RoundedCornerShape(12.dp)): Modifier {
     val scheme = MaterialTheme.colorScheme
     val finalBg = when {
+        scheme.isPixelPlayer -> Color(0xFF382954)
         scheme.isOledFlavor -> Color.Transparent
         scheme.isClaymorphism -> Color(0xFF242432)
         else -> scheme.surfaceVariant
     }
     val finalBorder = when {
+        scheme.isPixelPlayer -> BorderStroke(1.dp, Color(0xFF5E497A).copy(alpha = 0.3f))
         scheme.isOledFlavor -> BorderStroke(1.dp, scheme.outlineVariant)
         scheme.isClaymorphism -> BorderStroke(2.dp, Color.White.copy(alpha = 0.08f))
         else -> null
@@ -325,12 +338,39 @@ val DarkClaymorphismColorScheme = darkColorScheme(
 
 
 
+val PixelPlayerDarkColorScheme = darkColorScheme(
+    primary = Color(0xFFAB47BC), // PixelPlayPurplePrimary
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFF4A148C),
+    onPrimaryContainer = Color(0xFFE1BEE7),
+    secondary = Color(0xFFF06292), // PixelPlayPink
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFF880E4F),
+    onSecondaryContainer = Color(0xFFF8BBD0),
+    tertiary = Color(0xFFFF8A65), // PixelPlayOrange
+    onTertiary = Color(0xFFFFFFFF),
+    surface = Color(0xFF2A1F40), // PixelPlaySurface
+    surfaceContainer = Color(0xFF2A1F40),
+    surfaceContainerHigh = Color(0xFF352750),
+    surfaceContainerHighest = Color(0xFF403060),
+    background = Color(0xFF1E1234), // PixelPlayPurpleDark
+    onBackground = Color(0xFFFFFFFF),
+    onSurface = Color(0xFFE1BEE7), // PixelPlayLightPurple
+    surfaceVariant = Color(0xFF382954),
+    onSurfaceVariant = Color(0xFFD1C4E9),
+    outline = Color(0xFF5E497A),
+    outlineVariant = Color(0xFF423458),
+)
+
 @Composable
 fun rememberGradientBrush(): Brush {
     val appSettings = koinInject<AppSettings>()
     val colorSchemeType by appSettings.colorSchemeFlow.collectAsStateWithLifecycle()
     return remember(colorSchemeType) {
         when (colorSchemeType) {
+            AppColorScheme.PixelPlayer -> {
+                Brush.horizontalGradient(listOf(Color(0xFFAB47BC), Color(0xFFF06292)))
+            }
             AppColorScheme.AdwaitaBlack -> {
                 Brush.horizontalGradient(listOf(Color(0xFF3584E4), Color(0xFF1C71D8)))
             }

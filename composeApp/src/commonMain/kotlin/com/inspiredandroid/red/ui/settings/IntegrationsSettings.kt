@@ -47,15 +47,8 @@ internal fun IntegrationsContent(
         modifier = Modifier.fillMaxWidth()
     ) {
         // Obsidian Vault Sync
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        SettingsCard {
             Column(
-                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -90,10 +83,12 @@ internal fun IntegrationsContent(
                         modifier = Modifier.weight(1f),
                         placeholder = { Text("No vault path configured") },
                         label = { Text("Vault Directory Path") },
-                        singleLine = true
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
                     )
 
-                    Button(shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp), 
+                    Button(
+                        shape = RoundedCornerShape(16.dp), 
                         onClick = { directoryPicker.launch() },
                         modifier = Modifier.handCursor()
                     ) {
@@ -104,15 +99,8 @@ internal fun IntegrationsContent(
         }
 
         // Extensible Skills Integration
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        SettingsCard {
             Column(
-                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -136,7 +124,8 @@ internal fun IntegrationsContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Button(shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp), 
+                Button(
+                    shape = RoundedCornerShape(16.dp), 
                     onClick = { actions.onSelectTab(SettingsTab.Tools) },
                     modifier = Modifier.handCursor()
                 ) {

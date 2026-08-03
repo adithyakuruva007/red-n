@@ -39,6 +39,7 @@ enum class ThemeMode {
 }
 
 enum class AppColorScheme {
+    PixelPlayer,
     AdwaitaBlackLightBlue,
     AdwaitaBlack,
     Claymorphism,
@@ -304,7 +305,7 @@ class AppSettings(internal val settings: Settings) {
         return try {
             AppColorScheme.valueOf(raw)
         } catch (_: Exception) {
-            AppColorScheme.Claymorphism
+            AppColorScheme.PixelPlayer
         }
     }
 

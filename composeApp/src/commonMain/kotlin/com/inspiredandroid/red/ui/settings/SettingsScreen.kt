@@ -600,21 +600,22 @@ private fun SettingsTabSelector(
     ) {
         Row(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             tabs.forEach { tab ->
                 val isSelected = currentTab == tab
                 Surface(
                     modifier = Modifier
                         .handCursor()
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(CircleShape)
                         .clickable { onSelectTab(tab) },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = CircleShape,
                     color = if (isSelected) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        Color.Transparent
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                     },
                 ) {
                     Text(
@@ -626,9 +627,9 @@ private fun SettingsTabSelector(
                             SettingsTab.Sandbox -> stringResource(Res.string.settings_tab_sandbox)
                             SettingsTab.Integrations -> stringResource(Res.string.settings_tab_integrations)
                         },
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium),
                         maxLines = 1,
                     )
                 }

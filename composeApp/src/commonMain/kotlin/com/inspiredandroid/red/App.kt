@@ -188,6 +188,7 @@ private fun AppContent(
     val colorSchemeType by appSettings.colorSchemeFlow.collectAsStateWithLifecycle()
 
     val effectiveColorScheme = when (colorSchemeType) {
+        AppColorScheme.PixelPlayer -> PixelPlayerDarkColorScheme
         AppColorScheme.AdwaitaBlack -> DarkAdwaitaBlackColorScheme
         AppColorScheme.AdwaitaBlackLightBlue -> DarkAdwaitaBlackLightBlueColorScheme
         AppColorScheme.Claymorphism -> DarkClaymorphismColorScheme

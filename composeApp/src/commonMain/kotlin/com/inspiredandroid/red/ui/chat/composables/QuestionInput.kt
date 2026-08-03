@@ -204,8 +204,8 @@ fun QuestionInput(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, top = 2.dp, bottom = 4.dp)
-                .redInputSurface(isFocused = isFocused, shape = RoundedCornerShape(6.dp))
+                .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 8.dp)
+                .redInputSurface(isFocused = isFocused, shape = RoundedCornerShape(24.dp))
         ) {
             // Prompt input text field (transparent)
             TextField(
@@ -216,7 +216,7 @@ fun QuestionInput(
                     .focusRequester(focusRequester)
                     .onFocusChanged { isFocused = it.isFocused }
                     .fillMaxWidth()
-                    .heightIn(min = 32.dp, max = 80.dp)
+                    .heightIn(min = 36.dp, max = 100.dp)
                     .onPreviewKeyEvent { event ->
                         if (currentPlatform !is Platform.Mobile && event.key.keyCode == Key.Enter.keyCode && event.type == KeyEventType.KeyDown) {
                             if (event.isShiftPressed) {
@@ -252,8 +252,8 @@ fun QuestionInput(
                 ),
                 placeholder = {
                     Text(
-                        "prompt...",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        "Ask Red anything...",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     )
                 },
                 keyboardActions = if (currentPlatform !is Platform.Mobile) {
@@ -270,7 +270,7 @@ fun QuestionInput(
             if (files.isNotEmpty()) {
                 FlowRow(
                     modifier = Modifier
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .padding(horizontal = 14.dp, vertical = 4.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -283,6 +283,8 @@ fun QuestionInput(
                         }
                         SuggestionChip(
                             modifier = Modifier.handCursor(),
+                            shape = CircleShape,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                             onClick = { removeFile(file) },
                             icon = {
                                 Icon(
@@ -297,6 +299,7 @@ fun QuestionInput(
                                     Text(
                                         modifier = Modifier.handCursor(),
                                         text = truncateFileName(file.name),
+                                        style = MaterialTheme.typography.bodySmall,
                                     )
                                 }
                             },
@@ -307,7 +310,7 @@ fun QuestionInput(
             }
 
             HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
                 thickness = 1.dp,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -315,28 +318,32 @@ fun QuestionInput(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Plus button for attachments picker options
                 var menuExpanded by remember { mutableStateOf(false) }
                 Box {
-                    IconButton(
-                        onClick = { menuExpanded = true },
-                        modifier = Modifier.size(28.dp).handCursor()
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .redIconButtonSurface(shape = CircleShape)
+                            .clickable { menuExpanded = true }
+                            .handCursor(),
+                        contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Attachment Options",
                             tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
 
                     DropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ) {
                         DropdownMenuItem(
                             text = { Text("Add files", fontSize = 13.sp) },
@@ -382,32 +389,36 @@ fun QuestionInput(
                 Spacer(Modifier.weight(1f))
 
                 // Microphone Voice Chat Button
-                IconButton(
-                    onClick = {
-                        if (isListening) {
-                            speechRecognizer.stopListening()
-                        } else {
-                            speechRecognizer.startListening()
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .redIconButtonSurface(shape = CircleShape)
+                        .clickable {
+                            if (isListening) {
+                                speechRecognizer.stopListening()
+                            } else {
+                                speechRecognizer.startListening()
+                            }
                         }
-                    },
-                    modifier = Modifier.size(28.dp).handCursor()
+                        .handCursor(),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Mic,
                         contentDescription = "Voice Input",
                         tint = if (isListening) Color.Red else MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
                 Spacer(Modifier.width(8.dp))
 
-                // Upward Send Button or Stop Button
+                // Upward Send Button or Stop Button (PixelPlayer expressive gradient pill button)
                 Box(
                     modifier = Modifier
-                        .size(28.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(color = MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(brush = gradientBrush, shape = CircleShape)
                         .handCursor()
                         .clickable {
                             if (isLoading) {
@@ -421,8 +432,8 @@ fun QuestionInput(
                     Icon(
                         imageVector = if (isLoading) Icons.Default.Stop else Icons.Default.ArrowUpward,
                         contentDescription = "Send",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.White
                     )
                 }
             }
