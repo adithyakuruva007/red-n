@@ -61,6 +61,7 @@ import com.inspiredandroid.red.tools.SetupSmsPermissionHandler
 import com.inspiredandroid.red.tools.SetupSmsSendPermissionHandler
 import com.inspiredandroid.red.tools.SmsPermissionController
 import com.inspiredandroid.red.tools.SmsSendPermissionController
+import com.inspiredandroid.red.ui.PixelPlayerDarkColorScheme
 import com.inspiredandroid.red.ui.DarkClaymorphismColorScheme
 import com.inspiredandroid.red.ui.DarkAdwaitaBlackColorScheme
 import com.inspiredandroid.red.ui.DarkAdwaitaBlackLightBlueColorScheme
