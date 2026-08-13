@@ -45,14 +45,19 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.launch
 import com.inspiredandroid.red.ui.chat.composables.Sidebar
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -254,6 +259,7 @@ private fun AppContent(
                         CustomPixelSidebarDrawer(
                             sidebarExpanded = sidebarExpanded,
                             onCloseSidebar = { sidebarExpanded = false },
+                            onOpenSidebar = { sidebarExpanded = true },
                             sidebarContent = {
                                 Sidebar(
                                     state = chatUiState,
@@ -446,49 +452,106 @@ private fun AppContent(
 private fun CustomPixelSidebarDrawer(
     sidebarExpanded: Boolean,
     onCloseSidebar: () -> Unit,
+    onOpenSidebar: () -> Unit,
     sidebarContent: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(sidebarExpanded) {
-        if (sidebarExpanded) {
-            keyboardController?.hide()
+    val density = LocalDensity.current
+    val drawerWidthDp = 280.dp
+    val drawerWidthPx = remember(density, drawerWidthDp) { with(density) { drawerWidthDp.toPx() } }
+
+    val offsetX = remember { Animatable(if (sidebarExpanded) 0f else -drawerWidthPx) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(sidebarExpanded, drawerWidthPx) {
+        val target = if (sidebarExpanded) 0f else -drawerWidthPx
+        if (offsetX.value != target) {
+            offsetX.animateTo(target, animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val isDragging = remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(drawerWidthPx, sidebarExpanded) {
+                detectHorizontalDragGestures(
+                    onDragStart = { offset ->
+                        val edgeThreshold = 40.dp.toPx()
+                        if (sidebarExpanded || offset.x <= edgeThreshold) {
+                            isDragging.value = true
+                            keyboardController?.hide()
+                        }
+                    },
+                    onDragEnd = {
+                        if (isDragging.value) {
+                            isDragging.value = false
+                            scope.launch {
+                                if (offsetX.value > -drawerWidthPx / 2f) {
+                                    offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                    onOpenSidebar()
+                                } else {
+                                    offsetX.animateTo(-drawerWidthPx, tween(200))
+                                    onCloseSidebar()
+                                }
+                            }
+                        }
+                    },
+                    onDragCancel = {
+                        if (isDragging.value) {
+                            isDragging.value = false
+                            scope.launch {
+                                val target = if (sidebarExpanded) 0f else -drawerWidthPx
+                                offsetX.animateTo(target, tween(200))
+                            }
+                        }
+                    },
+                    onHorizontalDrag = { change, dragAmount ->
+                        if (isDragging.value) {
+                            change.consume()
+                            scope.launch {
+                                val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                offsetX.snapTo(newOffset)
+                            }
+                        }
+                    }
+                )
+            }
+    ) {
         content()
 
-        AnimatedVisibility(
-            visible = sidebarExpanded,
-            enter = fadeIn(animationSpec = tween(200)),
-            exit = fadeOut(animationSpec = tween(200)),
-        ) {
+        val progress = ((drawerWidthPx + offsetX.value) / drawerWidthPx).coerceIn(0f, 1f)
+
+        if (progress > 0f) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.55f))
+                    .graphicsLayer { alpha = 0.55f * progress }
+                    .background(Color.Black)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onCloseSidebar
+                        onClick = {
+                            scope.launch {
+                                offsetX.animateTo(-drawerWidthPx, tween(200))
+                                onCloseSidebar()
+                            }
+                        }
                     )
             )
-        }
 
-        AnimatedVisibility(
-            visible = sidebarExpanded,
-            enter = slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { -it },
-            exit = slideOutHorizontally(animationSpec = tween(200)) { -it },
-            modifier = Modifier.align(Alignment.CenterStart)
-        ) {
             Surface(
                 modifier = Modifier
-                    .width(280.dp)
-                    .fillMaxHeight(),
+                    .width(drawerWidthDp)
+                    .fillMaxHeight()
+                    .graphicsLayer {
+                        translationX = offsetX.value
+                    },
                 shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shadowElevation = 8.dp
+                shadowElevation = (8 * progress).dp
             ) {
                 sidebarContent()
             }
