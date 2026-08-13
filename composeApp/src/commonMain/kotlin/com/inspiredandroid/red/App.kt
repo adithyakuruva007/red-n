@@ -439,10 +439,12 @@ private fun AppContent(
                                 }
                             }
                         }
+                    }
                 }
             }
         }
     }
+}
 }
 
 @Composable
