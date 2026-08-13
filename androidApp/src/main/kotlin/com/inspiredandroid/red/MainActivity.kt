@@ -24,8 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.inspiredandroid.red.data.AppSettings
 import com.inspiredandroid.red.data.DataRepository
 import com.inspiredandroid.red.data.ThemeMode
-import com.inspiredandroid.red.ui.LightAdwaitaColorScheme
-import com.inspiredandroid.red.ui.DarkAdwaitaBlackColorScheme
+import com.inspiredandroid.red.ui.PixelPlayerDarkColorScheme
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.init
 import nl.marc_apps.tts.TextToSpeechEngine
@@ -71,8 +70,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
             val context = LocalContext.current
-            val lightScheme: ColorScheme = if (dynamicColor) dynamicLightColorScheme(context) else LightAdwaitaColorScheme
-            val darkScheme: ColorScheme = if (dynamicColor) dynamicDarkColorScheme(context) else DarkAdwaitaBlackColorScheme
+            val lightScheme: ColorScheme = if (dynamicColor) dynamicLightColorScheme(context) else PixelPlayerDarkColorScheme
+            val darkScheme: ColorScheme = if (dynamicColor) dynamicDarkColorScheme(context) else PixelPlayerDarkColorScheme
             val navController = rememberNavController()
             // Defer TTS initialization until after the first frame
             var ttsReady by remember { mutableStateOf(false) }
