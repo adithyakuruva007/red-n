@@ -473,6 +473,10 @@ private fun CustomPixelSidebarDrawer(
         }
     }
 
+    PlatformBackHandler(enabled = sidebarExpanded) {
+        onCloseSidebar()
+    }
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(

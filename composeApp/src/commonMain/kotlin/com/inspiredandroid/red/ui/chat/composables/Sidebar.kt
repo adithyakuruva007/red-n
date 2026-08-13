@@ -76,6 +76,7 @@ fun Sidebar(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .statusBarsPadding()
                 .padding(16.dp)
         ) {
             // App Header & Toggle
