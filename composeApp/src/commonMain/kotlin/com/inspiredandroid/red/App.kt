@@ -481,45 +481,47 @@ private fun CustomPixelSidebarDrawer(
             .pointerInput(drawerWidthPx, sidebarExpanded) {
                 awaitEachGesture {
                     val down = awaitFirstDown(pass = PointerEventPass.Initial)
-                    val edgeThreshold = 40.dp.toPx()
-                    val isEdgeOrOpen = sidebarExpanded || down.position.x <= edgeThreshold
 
-                    if (isEdgeOrOpen) {
-                        keyboardController?.hide()
-                        var dragging = false
-                        var lastX = down.position.x
+                    keyboardController?.hide()
+                    var dragging = false
+                    var lastX = down.position.x
+                    var totalDragX = 0f
 
-                        while (true) {
-                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
-                            val change = event.changes.firstOrNull() ?: break
-                            if (!change.pressed) break
+                    while (true) {
+                        val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                        val change = event.changes.firstOrNull() ?: break
+                        if (!change.pressed) break
 
-                            val currentX = change.position.x
-                            val dragAmount = currentX - lastX
-                            lastX = currentX
+                        val currentX = change.position.x
+                        val dragAmount = currentX - lastX
+                        lastX = currentX
+                        totalDragX += dragAmount
 
-                            if (!dragging && kotlin.math.abs(dragAmount) > 2f) {
+                        if (!dragging) {
+                            val isRightwardSwipe = !sidebarExpanded && totalDragX > 8f
+                            val isLeftwardOrOpenSwipe = sidebarExpanded && kotlin.math.abs(totalDragX) > 8f
+                            if (isRightwardSwipe || isLeftwardOrOpenSwipe) {
                                 dragging = true
-                            }
-
-                            if (dragging) {
-                                change.consume()
-                                scope.launch {
-                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
-                                    offsetX.snapTo(newOffset)
-                                }
                             }
                         }
 
                         if (dragging) {
+                            change.consume()
                             scope.launch {
-                                if (offsetX.value > -drawerWidthPx / 2f) {
-                                    offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
-                                    onOpenSidebar()
-                                } else {
-                                    offsetX.animateTo(-drawerWidthPx, tween(200))
-                                    onCloseSidebar()
-                                }
+                                val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                offsetX.snapTo(newOffset)
+                            }
+                        }
+                    }
+
+                    if (dragging) {
+                        scope.launch {
+                            if (offsetX.value > -drawerWidthPx / 2f) {
+                                offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                onOpenSidebar()
+                            } else {
+                                offsetX.animateTo(-drawerWidthPx, tween(200))
+                                onCloseSidebar()
                             }
                         }
                     }
