@@ -223,9 +223,7 @@ private fun ColorSchemePicker(
 ) {
     val options = listOf(
         AppColorScheme.PixelPlayer to "PixelPlayer (Electric Blue & Dark Black)",
-        AppColorScheme.AdwaitaBlack to "Adwaita Black",
-        AppColorScheme.AdwaitaBlackLightBlue to "Adwaita Black (Light Blue)",
-        AppColorScheme.Claymorphism to "Claymorphism (Dark Adwaita)",
+        AppColorScheme.Claymorphism to "Claymorphism (Dark Accent)",
     )
     val selectedLabel = options.firstOrNull { it.first == colorScheme }?.second ?: "PixelPlayer (Electric Blue & Dark Black)"
     var expanded by remember { mutableStateOf(false) }

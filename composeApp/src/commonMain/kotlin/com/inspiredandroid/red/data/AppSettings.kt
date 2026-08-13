@@ -40,8 +40,6 @@ enum class ThemeMode {
 
 enum class AppColorScheme {
     PixelPlayer,
-    AdwaitaBlackLightBlue,
-    AdwaitaBlack,
     Claymorphism,
 }
 

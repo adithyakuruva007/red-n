@@ -109,8 +109,8 @@ object Notifications
 @Composable
 fun App(
     navController: NavHostController,
-    lightColorScheme: ColorScheme = LightAdwaitaColorScheme,
-    darkColorScheme: ColorScheme = DarkAdwaitaBlackColorScheme,
+    lightColorScheme: ColorScheme = PixelPlayerDarkColorScheme,
+    darkColorScheme: ColorScheme = PixelPlayerDarkColorScheme,
     textToSpeech: TextToSpeechInstance? = null,
     isKoinStarted: Boolean = false,
     onAppOpens: ((Int) -> Unit)? = null,
@@ -194,8 +194,6 @@ private fun AppContent(
 
     val effectiveColorScheme = when (colorSchemeType) {
         AppColorScheme.PixelPlayer -> PixelPlayerDarkColorScheme
-        AppColorScheme.AdwaitaBlack -> DarkAdwaitaBlackColorScheme
-        AppColorScheme.AdwaitaBlackLightBlue -> DarkAdwaitaBlackLightBlueColorScheme
         AppColorScheme.Claymorphism -> DarkClaymorphismColorScheme
     }
 
@@ -244,69 +242,32 @@ private fun AppContent(
                             sidebarExpanded = false
                         }
                     }
-                    Box(Modifier.fillMaxSize()) {
-                        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                        val keyboardController = LocalSoftwareKeyboardController.current
-                        LaunchedEffect(sidebarExpanded) {
-                            if (sidebarExpanded) {
-                                drawerState.open()
-                                keyboardController?.hide()
-                            } else {
-                                drawerState.close()
-                            }
-                        }
-                        LaunchedEffect(drawerState.isOpen) {
-                            sidebarExpanded = drawerState.isOpen
-                            if (drawerState.isOpen) {
-                                keyboardController?.hide()
-                            }
-                        }
-
-                        ModalNavigationDrawer(
-                            drawerState = drawerState,
-                            gesturesEnabled = !showSettingsInSidebar && !showNotificationsInSidebar,
-                            drawerContent = {
-                                ModalDrawerSheet(
-                                    drawerContainerColor = Color.Transparent,
-                                    drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .width(380.dp)
-                                        .offset(x = (-100).dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(
-                                                color = MaterialTheme.colorScheme.background,
-                                                shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
-                                            )
-                                            .padding(start = 100.dp)
-                                    ) {
-                                        Sidebar(
-                                            state = chatUiState,
-                                            currentConversationId = chatUiState.currentConversationId,
-                                            onNavigateToSettings = {
-                                                showSettingsInSidebar = true
-                                            },
-                                            onNavigateToNotifications = {
-                                                showNotificationsInSidebar = true
-                                            },
-                                            onToggleSidebar = { sidebarExpanded = false },
-                                            modifier = Modifier.fillMaxSize(),
-                                            onNewChatClicked = {
-                                                showSettingsInSidebar = false
-                                                showNotificationsInSidebar = false
-                                                sidebarExpanded = false
-                                            },
-                                            onConversationClicked = { _ ->
-                                                showSettingsInSidebar = false
-                                                showNotificationsInSidebar = false
-                                                sidebarExpanded = false
-                                            }
-                                        )
+                        CustomPixelSidebarDrawer(
+                            sidebarExpanded = sidebarExpanded,
+                            onCloseSidebar = { sidebarExpanded = false },
+                            sidebarContent = {
+                                Sidebar(
+                                    state = chatUiState,
+                                    currentConversationId = chatUiState.currentConversationId,
+                                    onNavigateToSettings = {
+                                        showSettingsInSidebar = true
+                                    },
+                                    onNavigateToNotifications = {
+                                        showNotificationsInSidebar = true
+                                    },
+                                    onToggleSidebar = { sidebarExpanded = false },
+                                    modifier = Modifier.fillMaxSize(),
+                                    onNewChatClicked = {
+                                        showSettingsInSidebar = false
+                                        showNotificationsInSidebar = false
+                                        sidebarExpanded = false
+                                    },
+                                    onConversationClicked = { _ ->
+                                        showSettingsInSidebar = false
+                                        showNotificationsInSidebar = false
+                                        sidebarExpanded = false
                                     }
-                                }
+                                )
                             },
                             content = {
                                 NavHost(
@@ -466,8 +427,61 @@ private fun AppContent(
                                 }
                             }
                         }
-                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CustomPixelSidebarDrawer(
+    sidebarExpanded: Boolean,
+    onCloseSidebar: () -> Unit,
+    sidebarContent: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(sidebarExpanded) {
+        if (sidebarExpanded) {
+            keyboardController?.hide()
+        }
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        content()
+
+        AnimatedVisibility(
+            visible = sidebarExpanded,
+            enter = fadeIn(animationSpec = tween(200)),
+            exit = fadeOut(animationSpec = tween(200)),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.55f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onCloseSidebar
+                    )
+            )
+        }
+
+        AnimatedVisibility(
+            visible = sidebarExpanded,
+            enter = slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { -it },
+            exit = slideOutHorizontally(animationSpec = tween(200)) { -it },
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .width(280.dp)
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shadowElevation = 8.dp
+            ) {
+                sidebarContent()
             }
         }
     }

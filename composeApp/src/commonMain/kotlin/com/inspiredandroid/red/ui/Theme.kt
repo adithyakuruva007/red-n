@@ -260,65 +260,8 @@ fun Theme(
 
 
 
-val DarkAdwaitaBlackColorScheme = darkColorScheme(
-    primary = Color(0xFF3584E4),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFF1C71D8),
-    onPrimaryContainer = Color(0xFFFFFFFF),
-    secondary = Color(0xFFB0B0B0),
-    onSecondary = Color(0xFF212121),
-    secondaryContainer = Color(0xFF242424),
-    onSecondaryContainer = Color(0xFFEEEEEE),
-    surface = Color(0xFF101010),
-    background = Color(0xFF000000),
-    onBackground = Color(0xFFFFFFFF),
-    onSurface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFF242424),
-    onSurfaceVariant = Color(0xFFCCCCCC),
-    outline = Color(0xFF555555),
-    outlineVariant = Color(0xFF303030),
-)
-
-val DarkAdwaitaBlackLightBlueColorScheme = darkColorScheme(
-    primary = Color(0xFF62A0EA),
-    onPrimary = Color(0xFF000000),
-    primaryContainer = Color(0xFF3584E4),
-    onPrimaryContainer = Color(0xFFFFFFFF),
-    secondary = Color(0xFFB0B0B0),
-    onSecondary = Color(0xFF212121),
-    secondaryContainer = Color(0xFF242424),
-    onSecondaryContainer = Color(0xFFEEEEEE),
-    surface = Color(0xFF101010),
-    background = Color(0xFF000000),
-    onBackground = Color(0xFFFFFFFF),
-    onSurface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFF242424),
-    onSurfaceVariant = Color(0xFFCCCCCC),
-    outline = Color(0xFF555555),
-    outlineVariant = Color(0xFF303030),
-)
-
-val LightAdwaitaColorScheme = lightColorScheme(
-    primary = Color(0xFF3584E4),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFDAECFF),
-    onPrimaryContainer = Color(0xFF002244),
-    secondary = Color(0xFF777777),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFF0f0f0),
-    onSecondaryContainer = Color(0xFF212121),
-    surface = Color(0xFFF6F6F6),
-    background = Color(0xFFFFFFFF),
-    onBackground = Color(0xFF000000),
-    onSurface = Color(0xFF000000),
-    surfaceVariant = Color(0xFFE4E4E4),
-    onSurfaceVariant = Color(0xFF404040),
-    outline = Color(0xFF777777),
-    outlineVariant = Color(0xFFCCCCCC),
-)
-
 val DarkClaymorphismColorScheme = darkColorScheme(
-    primary = Color(0xFF3584E4), // Adwaita blue
+    primary = Color(0xFF3584E4),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFF1C71D8),
     onPrimaryContainer = Color(0xFFFFFFFF),
@@ -327,7 +270,7 @@ val DarkClaymorphismColorScheme = darkColorScheme(
     secondaryContainer = Color(0xFF282836),
     onSecondaryContainer = Color(0xFFE5E5EA),
     surface = Color(0xFF242432),
-    background = Color(0xFF1A1A24), // Slate dark
+    background = Color(0xFF1A1A24),
     onBackground = Color(0xFFFFFFFF),
     onSurface = Color(0xFFFFFFFF),
     surfaceVariant = Color(0xFF2D2D3E),
@@ -335,8 +278,6 @@ val DarkClaymorphismColorScheme = darkColorScheme(
     outline = Color(0xFF48485C),
     outlineVariant = Color(0xFF333346),
 )
-
-
 
 val PixelPlayerDarkColorScheme = darkColorScheme(
     primary = Color(0xFF3584E4), // Vibrant Blue
@@ -370,12 +311,6 @@ fun rememberGradientBrush(): Brush {
         when (colorSchemeType) {
             AppColorScheme.PixelPlayer -> {
                 Brush.horizontalGradient(listOf(Color(0xFF2563EB), Color(0xFF60A5FA)))
-            }
-            AppColorScheme.AdwaitaBlack -> {
-                Brush.horizontalGradient(listOf(Color(0xFF3584E4), Color(0xFF1C71D8)))
-            }
-            AppColorScheme.AdwaitaBlackLightBlue -> {
-                Brush.horizontalGradient(listOf(Color(0xFF62A0EA), Color(0xFF3584E4)))
             }
             AppColorScheme.Claymorphism -> {
                 Brush.horizontalGradient(listOf(Color(0xFF3584E4), Color(0xFF1C71D8)))
