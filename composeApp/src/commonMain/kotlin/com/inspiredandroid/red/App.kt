@@ -337,7 +337,6 @@ private fun AppContent(
                                 )
                             }
                         }
-                    }
                 } else {
                     Row(Modifier.fillMaxSize()) {
                         if (sidebarExpanded) {
