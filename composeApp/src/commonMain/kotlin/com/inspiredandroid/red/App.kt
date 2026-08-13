@@ -34,9 +34,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import com.inspiredandroid.red.ui.chat.composables.Sidebar
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -263,31 +264,45 @@ private fun AppContent(
                             gesturesEnabled = !showSettingsInSidebar && !showNotificationsInSidebar,
                             drawerContent = {
                                 ModalDrawerSheet(
-                                    drawerContainerColor = MaterialTheme.colorScheme.background,
-                                    modifier = Modifier.fillMaxHeight().width(280.dp)
+                                    drawerContainerColor = Color.Transparent,
+                                    drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(380.dp)
+                                        .offset(x = (-100).dp)
                                 ) {
-                                    Sidebar(
-                                        state = chatUiState,
-                                        currentConversationId = chatUiState.currentConversationId,
-                                        onNavigateToSettings = {
-                                            showSettingsInSidebar = true
-                                        },
-                                        onNavigateToNotifications = {
-                                            showNotificationsInSidebar = true
-                                        },
-                                        onToggleSidebar = { sidebarExpanded = false },
-                                        modifier = Modifier.fillMaxSize(),
-                                        onNewChatClicked = {
-                                            showSettingsInSidebar = false
-                                            showNotificationsInSidebar = false
-                                            sidebarExpanded = false
-                                        },
-                                        onConversationClicked = { _ ->
-                                            showSettingsInSidebar = false
-                                            showNotificationsInSidebar = false
-                                            sidebarExpanded = false
-                                        }
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.background,
+                                                shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+                                            )
+                                            .padding(start = 100.dp)
+                                    ) {
+                                        Sidebar(
+                                            state = chatUiState,
+                                            currentConversationId = chatUiState.currentConversationId,
+                                            onNavigateToSettings = {
+                                                showSettingsInSidebar = true
+                                            },
+                                            onNavigateToNotifications = {
+                                                showNotificationsInSidebar = true
+                                            },
+                                            onToggleSidebar = { sidebarExpanded = false },
+                                            modifier = Modifier.fillMaxSize(),
+                                            onNewChatClicked = {
+                                                showSettingsInSidebar = false
+                                                showNotificationsInSidebar = false
+                                                sidebarExpanded = false
+                                            },
+                                            onConversationClicked = { _ ->
+                                                showSettingsInSidebar = false
+                                                showNotificationsInSidebar = false
+                                                sidebarExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             },
                             content = {
