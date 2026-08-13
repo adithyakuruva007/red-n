@@ -445,7 +445,6 @@ private fun AppContent(
         }
     }
 }
-}
 
 @Composable
 private fun CustomPixelSidebarDrawer(
