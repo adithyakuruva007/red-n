@@ -50,12 +50,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.launch
 import com.inspiredandroid.red.ui.chat.composables.Sidebar
@@ -306,8 +309,8 @@ private fun AppContent(
                                             },
                                             isSandboxAvailable = currentPlatform is Platform.Mobile.Android,
                                             navigationTabBar = null,
-                                            onToggleSidebar = { sidebarExpanded = true },
-                                            isSidebarExpanded = false,
+                                            onToggleSidebar = { sidebarExpanded = !sidebarExpanded },
+                                            isSidebarExpanded = sidebarExpanded,
                                         )
                                     }
                                 }
@@ -472,7 +475,57 @@ private fun CustomPixelSidebarDrawer(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(drawerWidthPx, sidebarExpanded) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(pass = PointerEventPass.Initial)
+                    val edgeThreshold = 40.dp.toPx()
+                    val isEdgeOrOpen = sidebarExpanded || down.position.x <= edgeThreshold
+
+                    if (isEdgeOrOpen) {
+                        keyboardController?.hide()
+                        var dragging = false
+                        var lastX = down.position.x
+
+                        while (true) {
+                            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                            val change = event.changes.firstOrNull() ?: break
+                            if (!change.pressed) break
+
+                            val currentX = change.position.x
+                            val dragAmount = currentX - lastX
+                            lastX = currentX
+
+                            if (!dragging && kotlin.math.abs(dragAmount) > 2f) {
+                                dragging = true
+                            }
+
+                            if (dragging) {
+                                change.consume()
+                                scope.launch {
+                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                    offsetX.snapTo(newOffset)
+                                }
+                            }
+                        }
+
+                        if (dragging) {
+                            scope.launch {
+                                if (offsetX.value > -drawerWidthPx / 2f) {
+                                    offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                    onOpenSidebar()
+                                } else {
+                                    offsetX.animateTo(-drawerWidthPx, tween(200))
+                                    onCloseSidebar()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    ) {
         content()
 
         val progress = ((drawerWidthPx + offsetX.value) / drawerWidthPx).coerceIn(0f, 1f)
@@ -493,117 +546,21 @@ private fun CustomPixelSidebarDrawer(
                             }
                         }
                     )
-                    .pointerInput(drawerWidthPx) {
-                        detectHorizontalDragGestures(
-                            onDragStart = { keyboardController?.hide() },
-                            onDragEnd = {
-                                scope.launch {
-                                    if (offsetX.value > -drawerWidthPx / 2f) {
-                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
-                                        onOpenSidebar()
-                                    } else {
-                                        offsetX.animateTo(-drawerWidthPx, tween(200))
-                                        onCloseSidebar()
-                                    }
-                                }
-                            },
-                            onDragCancel = {
-                                scope.launch {
-                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
-                                    offsetX.animateTo(target, tween(200))
-                                }
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                scope.launch {
-                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
-                                    offsetX.snapTo(newOffset)
-                                }
-                            }
-                        )
-                    }
             )
-
-            Surface(
-                modifier = Modifier
-                    .width(drawerWidthDp)
-                    .fillMaxHeight()
-                    .graphicsLayer {
-                        translationX = offsetX.value
-                    }
-                    .pointerInput(drawerWidthPx) {
-                        detectHorizontalDragGestures(
-                            onDragStart = { keyboardController?.hide() },
-                            onDragEnd = {
-                                scope.launch {
-                                    if (offsetX.value > -drawerWidthPx / 2f) {
-                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
-                                        onOpenSidebar()
-                                    } else {
-                                        offsetX.animateTo(-drawerWidthPx, tween(200))
-                                        onCloseSidebar()
-                                    }
-                                }
-                            },
-                            onDragCancel = {
-                                scope.launch {
-                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
-                                    offsetX.animateTo(target, tween(200))
-                                }
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                scope.launch {
-                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
-                                    offsetX.snapTo(newOffset)
-                                }
-                            }
-                        )
-                    },
-                shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                shadowElevation = (8 * progress).dp
-            ) {
-                sidebarContent()
-            }
         }
 
-        if (progress == 0f) {
-            Box(
-                modifier = Modifier
-                    .width(40.dp)
-                    .fillMaxHeight()
-                    .align(Alignment.CenterStart)
-                    .pointerInput(drawerWidthPx) {
-                        detectHorizontalDragGestures(
-                            onDragStart = { keyboardController?.hide() },
-                            onDragEnd = {
-                                scope.launch {
-                                    if (offsetX.value > -drawerWidthPx / 2f) {
-                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
-                                        onOpenSidebar()
-                                    } else {
-                                        offsetX.animateTo(-drawerWidthPx, tween(200))
-                                        onCloseSidebar()
-                                    }
-                                }
-                            },
-                            onDragCancel = {
-                                scope.launch {
-                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
-                                    offsetX.animateTo(target, tween(200))
-                                }
-                            },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                scope.launch {
-                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
-                                    offsetX.snapTo(newOffset)
-                                }
-                            }
-                        )
-                    }
-            )
+        Surface(
+            modifier = Modifier
+                .width(drawerWidthDp)
+                .fillMaxHeight()
+                .graphicsLayer {
+                    translationX = offsetX.value
+                },
+            shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            shadowElevation = (8 * progress).dp
+        ) {
+            sidebarContent()
         }
     }
 }
