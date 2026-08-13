@@ -79,9 +79,6 @@ import com.inspiredandroid.red.tools.SmsPermissionController
 import com.inspiredandroid.red.tools.SmsSendPermissionController
 import com.inspiredandroid.red.ui.PixelPlayerDarkColorScheme
 import com.inspiredandroid.red.ui.DarkClaymorphismColorScheme
-import com.inspiredandroid.red.ui.DarkAdwaitaBlackColorScheme
-import com.inspiredandroid.red.ui.DarkAdwaitaBlackLightBlueColorScheme
-import com.inspiredandroid.red.ui.LightAdwaitaColorScheme
 import com.inspiredandroid.red.ui.Theme
 import com.inspiredandroid.red.PlatformBackHandler
 import com.inspiredandroid.red.ui.chat.ChatScreen
