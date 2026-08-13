@@ -34,8 +34,14 @@ jobs:
       - name: Verify Kotlin Desktop Compilation
         run: ./gradlew :composeApp:compileKotlinDesktop --stacktrace
 
-      - name: Upload Android APK Artifact
+      - name: Upload Android ARM64-v8a APK (20MB)
         uses: actions/upload-artifact@v4
         with:
-          name: red-n-apk
-          path: androidApp/build/outputs/apk/foss/release/*.apk
+          name: red-n-arm64-v8a-apk
+          path: androidApp/build/outputs/apk/foss/release/*arm64-v8a*.apk
+
+      - name: Upload Android x86_64 APK (20MB)
+        uses: actions/upload-artifact@v4
+        with:
+          name: red-n-x86_64-apk
+          path: androidApp/build/outputs/apk/foss/release/*x86_64*.apk
