@@ -471,55 +471,8 @@ private fun CustomPixelSidebarDrawer(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val isDragging = remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(drawerWidthPx, sidebarExpanded) {
-                detectHorizontalDragGestures(
-                    onDragStart = { offset ->
-                        val edgeThreshold = 40.dp.toPx()
-                        if (sidebarExpanded || offset.x <= edgeThreshold) {
-                            isDragging.value = true
-                            keyboardController?.hide()
-                        }
-                    },
-                    onDragEnd = {
-                        if (isDragging.value) {
-                            isDragging.value = false
-                            scope.launch {
-                                if (offsetX.value > -drawerWidthPx / 2f) {
-                                    offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
-                                    onOpenSidebar()
-                                } else {
-                                    offsetX.animateTo(-drawerWidthPx, tween(200))
-                                    onCloseSidebar()
-                                }
-                            }
-                        }
-                    },
-                    onDragCancel = {
-                        if (isDragging.value) {
-                            isDragging.value = false
-                            scope.launch {
-                                val target = if (sidebarExpanded) 0f else -drawerWidthPx
-                                offsetX.animateTo(target, tween(200))
-                            }
-                        }
-                    },
-                    onHorizontalDrag = { change, dragAmount ->
-                        if (isDragging.value) {
-                            change.consume()
-                            scope.launch {
-                                val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
-                                offsetX.snapTo(newOffset)
-                            }
-                        }
-                    }
-                )
-            }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         content()
 
         val progress = ((drawerWidthPx + offsetX.value) / drawerWidthPx).coerceIn(0f, 1f)
@@ -540,6 +493,35 @@ private fun CustomPixelSidebarDrawer(
                             }
                         }
                     )
+                    .pointerInput(drawerWidthPx) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { keyboardController?.hide() },
+                            onDragEnd = {
+                                scope.launch {
+                                    if (offsetX.value > -drawerWidthPx / 2f) {
+                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                        onOpenSidebar()
+                                    } else {
+                                        offsetX.animateTo(-drawerWidthPx, tween(200))
+                                        onCloseSidebar()
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
+                                    offsetX.animateTo(target, tween(200))
+                                }
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                    offsetX.snapTo(newOffset)
+                                }
+                            }
+                        )
+                    }
             )
 
             Surface(
@@ -548,6 +530,35 @@ private fun CustomPixelSidebarDrawer(
                     .fillMaxHeight()
                     .graphicsLayer {
                         translationX = offsetX.value
+                    }
+                    .pointerInput(drawerWidthPx) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { keyboardController?.hide() },
+                            onDragEnd = {
+                                scope.launch {
+                                    if (offsetX.value > -drawerWidthPx / 2f) {
+                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                        onOpenSidebar()
+                                    } else {
+                                        offsetX.animateTo(-drawerWidthPx, tween(200))
+                                        onCloseSidebar()
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
+                                    offsetX.animateTo(target, tween(200))
+                                }
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                    offsetX.snapTo(newOffset)
+                                }
+                            }
+                        )
                     },
                 shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -555,6 +566,44 @@ private fun CustomPixelSidebarDrawer(
             ) {
                 sidebarContent()
             }
+        }
+
+        if (progress == 0f) {
+            Box(
+                modifier = Modifier
+                    .width(40.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.CenterStart)
+                    .pointerInput(drawerWidthPx) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { keyboardController?.hide() },
+                            onDragEnd = {
+                                scope.launch {
+                                    if (offsetX.value > -drawerWidthPx / 2f) {
+                                        offsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow))
+                                        onOpenSidebar()
+                                    } else {
+                                        offsetX.animateTo(-drawerWidthPx, tween(200))
+                                        onCloseSidebar()
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    val target = if (sidebarExpanded) 0f else -drawerWidthPx
+                                    offsetX.animateTo(target, tween(200))
+                                }
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    val newOffset = (offsetX.value + dragAmount).coerceIn(-drawerWidthPx, 0f)
+                                    offsetX.snapTo(newOffset)
+                                }
+                            }
+                        )
+                    }
+            )
         }
     }
 }
