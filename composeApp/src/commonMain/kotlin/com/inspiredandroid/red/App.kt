@@ -25,6 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Density
@@ -250,72 +254,85 @@ private fun AppContent(
                 }
 
                 if (currentPlatform is Platform.Mobile) {
-                    PlatformBackHandler(enabled = sidebarExpanded || showSettingsInSidebar || showNotificationsInSidebar) {
-                        if (showSettingsInSidebar) {
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    val focusManager = LocalFocusManager.current
+                    val isKeyboardVisible = WindowInsets.ime.asPaddingValues().calculateBottomPadding() > 0.dp
+
+                    PlatformBackHandler(enabled = isKeyboardVisible || showSettingsInSidebar || showNotificationsInSidebar || sidebarExpanded) {
+                        if (isKeyboardVisible) {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        } else if (showSettingsInSidebar) {
+                            chatViewModel.refreshSettings()
                             showSettingsInSidebar = false
                         } else if (showNotificationsInSidebar) {
                             showNotificationsInSidebar = false
-                        } else {
+                        } else if (sidebarExpanded) {
                             sidebarExpanded = false
                         }
                     }
-                        CustomPixelSidebarDrawer(
-                            sidebarExpanded = sidebarExpanded,
-                            onCloseSidebar = { sidebarExpanded = false },
-                            onOpenSidebar = { sidebarExpanded = true },
-                            sidebarContent = {
-                                Sidebar(
-                                    state = chatUiState,
-                                    currentConversationId = chatUiState.currentConversationId,
-                                    onNavigateToSettings = {
-                                        showSettingsInSidebar = true
-                                    },
-                                    onNavigateToNotifications = {
-                                        showNotificationsInSidebar = true
-                                    },
-                                    onToggleSidebar = { sidebarExpanded = false },
-                                    modifier = Modifier.fillMaxSize(),
-                                    onNewChatClicked = {
-                                        showSettingsInSidebar = false
-                                        showNotificationsInSidebar = false
-                                        sidebarExpanded = false
-                                    },
-                                    onConversationClicked = { _ ->
-                                        showSettingsInSidebar = false
-                                        showNotificationsInSidebar = false
-                                        sidebarExpanded = false
-                                    }
-                                )
-                            },
-                            content = {
-                                NavHost(
-                                    navController,
-                                    startDestination = Home,
-                                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-                                ) {
-                                    composable<Home> {
-                                        ChatScreen(
-                                            viewModel = chatViewModel,
-                                            textToSpeech = textToSpeech,
-                                            onNavigateToSettings = {
-                                                sidebarExpanded = true
-                                                showSettingsInSidebar = true
-                                                showNotificationsInSidebar = false
-                                            },
-                                            onNavigateToNotifications = {
-                                                sidebarExpanded = true
-                                                showNotificationsInSidebar = true
-                                                showSettingsInSidebar = false
-                                            },
-                                            isSandboxAvailable = currentPlatform is Platform.Mobile.Android,
-                                            navigationTabBar = null,
-                                            onToggleSidebar = { sidebarExpanded = !sidebarExpanded },
-                                            isSidebarExpanded = sidebarExpanded,
-                                        )
-                                    }
+
+                    CustomPixelSidebarDrawer(
+                        sidebarExpanded = sidebarExpanded,
+                        onCloseSidebar = { sidebarExpanded = false },
+                        onOpenSidebar = { sidebarExpanded = true },
+                        sidebarContent = {
+                            Sidebar(
+                                state = chatUiState,
+                                currentConversationId = chatUiState.currentConversationId,
+                                onNavigateToSettings = {
+                                    sidebarExpanded = false
+                                    showSettingsInSidebar = true
+                                    showNotificationsInSidebar = false
+                                },
+                                onNavigateToNotifications = {
+                                    sidebarExpanded = false
+                                    showNotificationsInSidebar = true
+                                    showSettingsInSidebar = false
+                                },
+                                onToggleSidebar = { sidebarExpanded = false },
+                                modifier = Modifier.fillMaxSize(),
+                                onNewChatClicked = {
+                                    showSettingsInSidebar = false
+                                    showNotificationsInSidebar = false
+                                    sidebarExpanded = false
+                                },
+                                onConversationClicked = { _ ->
+                                    showSettingsInSidebar = false
+                                    showNotificationsInSidebar = false
+                                    sidebarExpanded = false
+                                }
+                            )
+                        },
+                        content = {
+                            NavHost(
+                                navController,
+                                startDestination = Home,
+                                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                            ) {
+                                composable<Home> {
+                                    ChatScreen(
+                                        viewModel = chatViewModel,
+                                        textToSpeech = textToSpeech,
+                                        onNavigateToSettings = {
+                                            sidebarExpanded = false
+                                            showSettingsInSidebar = true
+                                            showNotificationsInSidebar = false
+                                        },
+                                        onNavigateToNotifications = {
+                                            sidebarExpanded = false
+                                            showNotificationsInSidebar = true
+                                            showSettingsInSidebar = false
+                                        },
+                                        isSandboxAvailable = currentPlatform is Platform.Mobile.Android,
+                                        navigationTabBar = null,
+                                        onToggleSidebar = { sidebarExpanded = !sidebarExpanded },
+                                        isSidebarExpanded = sidebarExpanded,
+                                    )
                                 }
                             }
-                        )
+                        }
+                    )
 
                         if (showSettingsInSidebar) {
                             Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -473,10 +490,6 @@ private fun CustomPixelSidebarDrawer(
         }
     }
 
-    PlatformBackHandler(enabled = sidebarExpanded) {
-        onCloseSidebar()
-    }
-
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
@@ -485,8 +498,9 @@ private fun CustomPixelSidebarDrawer(
             .pointerInput(drawerWidthPx, sidebarExpanded) {
                 awaitEachGesture {
                     val down = awaitFirstDown(pass = PointerEventPass.Initial)
+                    val screenWidthPx = size.width.toFloat()
+                    val isLeftHalfTouch = down.position.x <= screenWidthPx / 2f
 
-                    keyboardController?.hide()
                     var dragging = false
                     var lastX = down.position.x
                     var totalDragX = 0f
@@ -502,10 +516,11 @@ private fun CustomPixelSidebarDrawer(
                         totalDragX += dragAmount
 
                         if (!dragging) {
-                            val isRightwardSwipe = !sidebarExpanded && totalDragX > 8f
+                            val isRightwardSwipe = !sidebarExpanded && isLeftHalfTouch && totalDragX > 8f
                             val isLeftwardOrOpenSwipe = sidebarExpanded && kotlin.math.abs(totalDragX) > 8f
                             if (isRightwardSwipe || isLeftwardOrOpenSwipe) {
                                 dragging = true
+                                keyboardController?.hide()
                             }
                         }
 
