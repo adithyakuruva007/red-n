@@ -1,5 +1,5 @@
 # Red AI Agent
-
+This is an experimental fork of original red project
 Red is a private, powerful AI Agent built with Kotlin Multiplatform and Compose Multiplatform. It runs natively on Desktop (Linux, macOS, Windows) and Mobile (Android, iOS).
 
 **Creator & Maintainer:** [adithyakuruva007](https://github.com/adithyakuruva007)
