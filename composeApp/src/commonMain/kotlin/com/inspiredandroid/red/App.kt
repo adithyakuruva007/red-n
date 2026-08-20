@@ -499,7 +499,7 @@ private fun CustomPixelSidebarDrawer(
                 awaitEachGesture {
                     val down = awaitFirstDown(pass = PointerEventPass.Initial)
                     val screenWidthPx = size.width.toFloat()
-                    val isLeftHalfTouch = down.position.x <= screenWidthPx / 2f
+                    val isLeftEdge20Touch = down.position.x <= screenWidthPx * 0.2f
 
                     var dragging = false
                     var lastX = down.position.x
@@ -516,7 +516,7 @@ private fun CustomPixelSidebarDrawer(
                         totalDragX += dragAmount
 
                         if (!dragging) {
-                            val isRightwardSwipe = !sidebarExpanded && isLeftHalfTouch && totalDragX > 8f
+                            val isRightwardSwipe = !sidebarExpanded && isLeftEdge20Touch && totalDragX > 8f
                             val isLeftwardOrOpenSwipe = sidebarExpanded && kotlin.math.abs(totalDragX) > 8f
                             if (isRightwardSwipe || isLeftwardOrOpenSwipe) {
                                 dragging = true
