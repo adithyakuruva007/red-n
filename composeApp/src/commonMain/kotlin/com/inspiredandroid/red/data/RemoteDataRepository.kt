@@ -894,6 +894,7 @@ class RemoteDataRepository(
                     )
                 }
             }
+            saveCurrentConversation()
         }
 
         compactHistoryIfNeeded()
